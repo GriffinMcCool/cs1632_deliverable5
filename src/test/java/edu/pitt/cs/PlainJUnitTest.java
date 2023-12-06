@@ -167,7 +167,6 @@ public class PlainJUnitTest {
 				Bean[] beans = createBeans(logicSlotCounts[i], beanCount, true);
 				logics[i].reset(beans);
 
-				boolean res = true;
 				int iter = 0;
 				int remainingExpected = (beanCount > 0) ? beanCount - 1 : 0;
 				int inFlightExpected = (beanCount > 0) ? 1 : 0;
@@ -446,13 +445,13 @@ public class PlainJUnitTest {
 
 		int sum = 0;
 		for(int i = 0; i < logic.getSlotCount(); i++) {
-			sum += logic.getSlotBeanCount(i) * (i + 1);
+			sum += logic.getSlotBeanCount(i) * i;
 		}
 		double expectedAverage = sum / 200.0;
 		double observedAverage = logic.getAverageSlotBeanCount();
 		double idealAverage = 4.5;
 
-		assertTrue("Check expected - observed", Math.abs(expectedAverage - observedAverage) > 0.01);
+		assertTrue("Check expected - observed", Math.abs(expectedAverage - observedAverage) < 0.01);
 		assertTrue("Check ideal - observed", Math.abs(idealAverage - observedAverage) < 0.5);
 	}
 
@@ -473,7 +472,7 @@ public class PlainJUnitTest {
 	public void testMain() {
 		// TODO: Implement using out.toString() to get output stream
 		String[] args = {"10", "500", "luck"};
-		BeanCounterLogicSolution.main(args);
+		BeanCounterLogicImpl.main(args);
 		String output = out.toString();
 
 		String[] lines = output.split("\n");

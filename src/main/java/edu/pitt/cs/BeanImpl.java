@@ -40,6 +40,9 @@ public class BeanImpl implements Bean {
 	// TODO: Add more member variables as needed
 	private int xpos;
 	private int ypos;
+	private boolean isLuck;
+	private Random rand;
+	private int skillLevel;
 
 	/**
 	 * Constructor - creates a bean in either luck mode or skill mode.
@@ -50,6 +53,15 @@ public class BeanImpl implements Bean {
 	 */
 	BeanImpl(int slotCount, boolean isLuck, Random rand) {
 		// TODO: Implement
+		xpos = 0;
+		ypos = 0;
+		this.isLuck = isLuck;
+		this.rand = rand;
+
+		double skillAverage = (slotCount - 1) * 0.5;
+		double skillStDev = Math.sqrt(slotCount * 0.5 * (1 - 0.5));
+		int skillLevel = (int) Math.round(rand.nextGaussian() * skillStDev + skillAverage);
+		this.skillLevel = skillLevel < 0 ? 0 : skillLevel;
 	}
 
 	/**
@@ -60,7 +72,7 @@ public class BeanImpl implements Bean {
 	 */
 	public int getXPos() {
 		// TODO: Implement
-		return 0;
+		return xpos;
 	}
 
 	/**
@@ -71,7 +83,7 @@ public class BeanImpl implements Bean {
 	 */
 	public int getYPos() {
 		// TODO: Implement
-		return 0;
+		return ypos;
 	}
 
 	/**
@@ -80,6 +92,8 @@ public class BeanImpl implements Bean {
 	 */
 	public void reset() {
 		// TODO: Implement
+		xpos = 0;
+		ypos = 0;
 	}
 
 	/**
@@ -94,5 +108,17 @@ public class BeanImpl implements Bean {
 	 */
 	public void advanceStep() {
 		// TODO: Implement
+		if(!isLuck) {
+			if(xpos <= skillLevel) {
+				xpos++;
+			}
+			else {
+				xpos--;
+			}
+		}
+		else if(rand.nextInt(2) == 1) {
+			xpos++;
+		}
+		ypos++;
 	}
 }
