@@ -27,6 +27,9 @@ public class JPFJUnitTest {
 	private static int slotCount; // The number of slots in the machine we want to test
 	private static int beanCount; // The number of beans in the machine we want to test
 	private static boolean isLuck; // Whether the machine we want to test is in "luck" or "skill" mode
+	private BeanCounterLogic[] logics;
+	private final int[] beanCounts = { 0, 2, 20, 200 };
+	private final int[] logicSlotCounts = { 1, 10, 20 };
 
 	/**
 	 * Sets up the test fixture.
@@ -45,6 +48,9 @@ public class JPFJUnitTest {
 			 * how to use the Verify API, look at:
 			 * https://github.com/javapathfinder/jpf-core/wiki/Verify-API-of-JPF
 			 */
+			slotCount = Verify.getInt(1, 5);
+			beanCount = Verify.getInt(0, 3);
+			isLuck = Verify.getBoolean();
 		} else {
 			assert (false);
 		}
@@ -85,22 +91,50 @@ public class JPFJUnitTest {
 	 */
 	@Test
 	public void testReset() {
-		// TODO: Implement
-		/*
-		 * Currently, it just prints out the failString to demonstrate to you all the
-		 * cases considered by Java Path Finder. If you called the Verify API correctly
-		 * in setUp(), you should see all combinations of machines
-		 * (slotCount/beanCount/isLucky) printed here:
-		 * 
-		 * Failure in (slotCount=1, beanCount=0, isLucky=false):
-		 * Failure in (slotCount=1, beanCount=0, isLucky=true):
-		 * Failure in (slotCount=1, beanCount=1, isLucky=false):
-		 * Failure in (slotCount=1, beanCount=1, isLucky=true):
-		 * ...
-		 * 
-		 * PLEASE REMOVE when you are done implementing.
-		 */
-		System.out.println(failString);
+		logic.reset(beans);
+
+		int remainingObserved = logic.getRemainingBeanCount();
+		int inFlightBeanCount = getInFlightBeanCount(logic, slotCount);
+		int inSlotBeanCount = getInSlotsBeanCount(logic, slotCount);
+
+		if (beanCount > 0){
+			assertEquals(failString, beanCount - 1, remainingObserved);
+			assertEquals(failString, 1, inFlightBeanCount);
+			assertEquals(failString, 0, inSlotBeanCount);
+		}
+
+		if (beanCount == 0){
+			assertEquals(failString, 0, remainingObserved);
+			assertEquals(failString, 0, inFlightBeanCount);
+			assertEquals(failString, 0, inSlotBeanCount);
+		}
+	}
+
+	private Bean[] createBeans(int slotCount, int beanCount, boolean luck) {
+		Bean[] beans = new Bean[beanCount];
+		for (int i = 0; i < beanCount; i++) {
+			beans[i] = Bean.createInstance(slotCount, luck, rand);
+		}
+		return beans;
+	}
+
+	private int getInFlightBeanCount(BeanCounterLogic logic, int slotCount) {
+		int inFlight = 0;
+		for (int yPos = 0; yPos < slotCount; yPos++) {
+			int xPos = logic.getInFlightBeanXPos(yPos);
+			if (xPos != BeanCounterLogic.NO_BEAN_IN_YPOS) {
+				inFlight++;
+			}
+		}
+		return inFlight;
+	}
+
+	private int getInSlotsBeanCount(BeanCounterLogic logic, int slotCount) {
+		int inSlots = 0;
+		for (int i = 0; i < slotCount; i++) {
+			inSlots += logic.getSlotBeanCount(i);
+		}
+		return inSlots;
 	}
 
 	/**

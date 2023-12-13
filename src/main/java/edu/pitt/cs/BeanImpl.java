@@ -109,11 +109,8 @@ public class BeanImpl implements Bean {
 	public void advanceStep() {
 		// TODO: Implement
 		if(!isLuck) {
-			if(xpos <= skillLevel) {
+			if(xpos < skillLevel) {
 				xpos++;
-			}
-			else {
-				xpos--;
 			}
 		}
 		else if(rand.nextInt(2) == 1) {
