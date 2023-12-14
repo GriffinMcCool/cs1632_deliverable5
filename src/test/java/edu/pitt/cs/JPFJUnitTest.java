@@ -1,13 +1,13 @@
 package edu.pitt.cs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import gov.nasa.jpf.vm.Verify;
 import java.util.Random;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import gov.nasa.jpf.vm.Verify;
-
-import static org.junit.Assert.*;
 
 /**
  * Code by @author Wonsun Ahn
@@ -27,9 +27,6 @@ public class JPFJUnitTest {
 	private static int slotCount; // The number of slots in the machine we want to test
 	private static int beanCount; // The number of beans in the machine we want to test
 	private static boolean isLuck; // Whether the machine we want to test is in "luck" or "skill" mode
-	private BeanCounterLogic[] logics;
-	private final int[] beanCounts = { 0, 2, 20, 200 };
-	private final int[] logicSlotCounts = { 1, 10, 20 };
 
 	/**
 	 * Sets up the test fixture.
@@ -97,25 +94,17 @@ public class JPFJUnitTest {
 		int inFlightBeanCount = getInFlightBeanCount(logic, slotCount);
 		int inSlotBeanCount = getInSlotsBeanCount(logic, slotCount);
 
-		if (beanCount > 0){
+		if (beanCount > 0) {
 			assertEquals(failString, beanCount - 1, remainingObserved);
 			assertEquals(failString, 1, inFlightBeanCount);
 			assertEquals(failString, 0, inSlotBeanCount);
 		}
 
-		if (beanCount == 0){
+		if (beanCount == 0) {
 			assertEquals(failString, 0, remainingObserved);
 			assertEquals(failString, 0, inFlightBeanCount);
 			assertEquals(failString, 0, inSlotBeanCount);
 		}
-	}
-
-	private Bean[] createBeans(int slotCount, int beanCount, boolean luck) {
-		Bean[] beans = new Bean[beanCount];
-		for (int i = 0; i < beanCount; i++) {
-			beans[i] = Bean.createInstance(slotCount, luck, rand);
-		}
-		return beans;
 	}
 
 	private int getInFlightBeanCount(BeanCounterLogic logic, int slotCount) {
@@ -153,7 +142,14 @@ public class JPFJUnitTest {
 	 */
 	@Test
 	public void testAdvanceStepCoordinates() {
-		// TODO: Implement
+		int xpos;
+		logic.reset(beans);
+		while (logic.advanceStep()) {
+			for (int i = 0; i < slotCount; i++) {
+				xpos = logic.getInFlightBeanXPos(i);
+				assertTrue(failString, xpos == BeanCounterLogic.NO_BEAN_IN_YPOS || (xpos >= 0 && xpos <= i));
+			}
+		}
 	}
 
 	/**
@@ -170,7 +166,16 @@ public class JPFJUnitTest {
 	 */
 	@Test
 	public void testAdvanceStepBeanCount() {
-		// TODO: Implement
+		int inFlightBeanCount;
+		int remainingBeanCount;
+		int inSlotBeanCount;
+		logic.reset(beans);
+		while (logic.advanceStep()) {
+			inFlightBeanCount = getInFlightBeanCount(logic, slotCount);
+			inSlotBeanCount = getInSlotsBeanCount(logic, slotCount);
+			remainingBeanCount = logic.getRemainingBeanCount();
+			assertEquals(failString, beanCount, inFlightBeanCount + inSlotBeanCount + remainingBeanCount);
+		}
 	}
 
 	/**
@@ -189,7 +194,19 @@ public class JPFJUnitTest {
 	 */
 	@Test
 	public void testAdvanceStepPostCondition() {
-		// TODO: Implement
+		logic.reset(beans);
+		while (logic.advanceStep()) {
+			;
+		}
+		int inFlightBeanCount;
+		int remainingBeanCount;
+		int inSlotBeanCount;
+		inFlightBeanCount = getInFlightBeanCount(logic, slotCount);
+		inSlotBeanCount = getInSlotsBeanCount(logic, slotCount);
+		remainingBeanCount = logic.getRemainingBeanCount();
+		assertEquals(failString, 0, remainingBeanCount);
+		assertEquals(failString, 0, inFlightBeanCount);
+		assertEquals(failString, beanCount, inSlotBeanCount);
 	}
 
 	/**
@@ -211,7 +228,45 @@ public class JPFJUnitTest {
 	 */
 	@Test
 	public void testLowerHalf() {
-		// TODO: Implement
+		logic.reset(beans);
+		int[] expectedSlotCounts = new int[slotCount];
+		int[] observedSlotCounts = new int[slotCount];
+
+		while (logic.advanceStep()) {
+			;
+		}
+		
+		int remainingBeans = 0;
+		if (beanCount % 2 == 0) {
+			remainingBeans = beanCount / 2;
+		} else {
+			remainingBeans = (beanCount + 1) / 2;
+		}
+
+		for (int i = 0; i < slotCount; i++) {
+			if (remainingBeans > 0) {
+				int count = logic.getSlotBeanCount(i);
+				if (remainingBeans > count) {
+					expectedSlotCounts[i] = count;
+					remainingBeans -= count;
+				} else {
+					expectedSlotCounts[i] = remainingBeans;
+					remainingBeans = 0;
+				}
+			} else {
+				expectedSlotCounts[i] = 0;
+			}
+		}
+
+		logic.lowerHalf();
+
+		for (int i = 0; i < slotCount; i++) {
+			observedSlotCounts[i] = logic.getSlotBeanCount(i);
+		}
+
+		for (int i = 0; i < slotCount; i++) {
+			assertEquals(failString, expectedSlotCounts[i], observedSlotCounts[i]);
+		}
 	}
 
 	/**
@@ -233,7 +288,45 @@ public class JPFJUnitTest {
 	 */
 	@Test
 	public void testUpperHalf() {
-		// TODO: Implement
+		logic.reset(beans);
+		int[] expectedSlotCounts = new int[slotCount];
+		int[] observedSlotCounts = new int[slotCount];
+
+		while (logic.advanceStep()) {
+			;
+		}
+
+		int remainingBeans = 0;
+		if (beanCount % 2 == 0) {
+			remainingBeans = beanCount / 2;
+		} else {
+			remainingBeans = (beanCount + 1) / 2;
+		}
+
+		for (int i = slotCount - 1; i >= 0; i--) {
+			if (remainingBeans > 0) {
+				int count = logic.getSlotBeanCount(i);
+				if (remainingBeans > count) {
+					expectedSlotCounts[i] = count;
+					remainingBeans -= count;
+				} else {
+					expectedSlotCounts[i] = remainingBeans;
+					remainingBeans = 0;
+				}
+			} else {
+				expectedSlotCounts[i] = 0;
+			}
+		}
+
+		logic.upperHalf();
+
+		for (int i = 0; i < slotCount; i++) {
+			observedSlotCounts[i] = logic.getSlotBeanCount(i);
+		}
+
+		for (int i = 0; i < slotCount; i++) {
+			assertEquals(failString, expectedSlotCounts[i], observedSlotCounts[i]);
+		}
 	}
 
 	/**
@@ -255,7 +348,118 @@ public class JPFJUnitTest {
 	@Test
 	public void testRepeat() {
 		if (!isLuck) {
-			// TODO: Implement
+			int[] expectedSlotCounts = new int[slotCount];
+			int[] observedSlotCounts = new int[slotCount];
+
+			logic.reset(beans);
+			while (logic.advanceStep()) {
+				;
+			}
+
+			for (int i = 0; i < slotCount; i++) {
+				expectedSlotCounts[i] = logic.getSlotBeanCount(i);
+			}
+
+			logic.repeat();
+
+			while (logic.advanceStep()) {
+				;
+			}
+
+			for (int i = 0; i < slotCount; i++) {
+				observedSlotCounts[i] = logic.getSlotBeanCount(i);
+			}
+
+			for (int i = 0; i < slotCount; i++) {
+				assertEquals(failString, expectedSlotCounts[i], observedSlotCounts[i]);
+			}
+		}
+	}
+
+	/**
+	 * Test case for void lowerHalf() and upperHalf().
+	 * 
+	 * <pre>
+	 * Preconditions: logic has been initialized with an instance of BeanCounterLogic.
+	 *                beans has been initialized with an array of Bean objects.
+	 * Execution steps: Call logic.reset(beans).
+	 *                  Call logic.advanceStep() in a loop until it returns false (the machine terminates).
+	 *                  Calculate expected bean counts for each slot after having called logic.lowerHalf() then logic.upperHalf(),
+	 *                  from current slot bean counts, and store into an expectedSlotCounts array.
+	 * 					Call logic.lowerHalf().
+	 *                  Call logic.upperHalf().
+	 *                  Construct an observedSlotCounts array that stores current bean counts for each slot.
+	 * Invariants: expectedSlotCounts matches observedSlotCounts exactly.
+	 * </pre>
+	 */
+	@Test
+	public void testLowerHalfThenUpperHalf() {
+		logic.reset(beans);
+		int[] lowerExpectedSlotCounts = new int[slotCount];
+		int[] expectedSlotCounts = new int[slotCount];
+		int[] observedSlotCounts = new int[slotCount];
+
+		while (logic.advanceStep()) {
+			;
+		}
+		
+		int remainingBeans = 0;
+		if (beanCount % 2 == 0) {
+			remainingBeans = beanCount / 2;
+		} else {
+			remainingBeans = (beanCount + 1) / 2;
+		}
+
+		for (int i = 0; i < slotCount; i++) {
+			if (remainingBeans > 0) {
+				int count = logic.getSlotBeanCount(i);
+				if (remainingBeans > count) {
+					lowerExpectedSlotCounts[i] = count;
+					remainingBeans -= count;
+				} else {
+					lowerExpectedSlotCounts[i] = remainingBeans;
+					remainingBeans = 0;
+				}
+			} else {
+				lowerExpectedSlotCounts[i] = 0;
+			}
+		}
+		
+		remainingBeans = 0;
+		for (int i = 0; i < slotCount; i++) {
+			remainingBeans += lowerExpectedSlotCounts[i];
+		}
+
+		if (remainingBeans % 2 == 0) {
+			remainingBeans = remainingBeans / 2;
+		} else {
+			remainingBeans = (remainingBeans + 1) / 2;
+		}
+
+		for (int i = slotCount - 1; i >= 0; i--) {
+			if (remainingBeans > 0) {
+				int count = lowerExpectedSlotCounts[i];
+				if (remainingBeans > count) {
+					expectedSlotCounts[i] = count;
+					remainingBeans -= count;
+				} else {
+					expectedSlotCounts[i] = remainingBeans;
+					remainingBeans = 0;
+				}
+			} else {
+				expectedSlotCounts[i] = 0;
+			}
+		}
+
+		logic.lowerHalf();
+		logic.upperHalf();
+
+		for (int i = 0; i < slotCount; i++) {
+			observedSlotCounts[i] = logic.getSlotBeanCount(i);
+		}
+
+		for (int i = 0; i < slotCount; i++) {
+			assertEquals(failString, expectedSlotCounts[i], observedSlotCounts[i]);
 		}
 	}
 }

@@ -6,13 +6,8 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
@@ -20,7 +15,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations.Mock;
 
 @edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
 		    value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR", 
@@ -92,6 +86,9 @@ public class PlainJUnitTest {
 		}
 	}
 
+	/**
+	 * Teardown.
+	 */
 	@After
 	public void tearDown() {
 		logics = null;
@@ -160,7 +157,6 @@ public class PlainJUnitTest {
 	 */
 	@Test
 	public void testAdvanceStepLuckMode() {
-		// TODO: Implement
 		for (int i = 0; i < logics.length; i++) {
 			for (int beanCount : beanCounts) {
 				String failString = getFailString(i, beanCount);
@@ -172,14 +168,14 @@ public class PlainJUnitTest {
 				int inFlightExpected = (beanCount > 0) ? 1 : 0;
 				int inSlotsExpected = 0;
 
-				while(logics[i].advanceStep()) {
+				while (logics[i].advanceStep()) {
 					iter++;
 
-					if(inFlightExpected > 0 && iter - logics[i].getSlotCount() >= 0) {
+					if (inFlightExpected > 0 && iter - logics[i].getSlotCount() >= 0) {
 						inSlotsExpected++;
 						inFlightExpected--;
 					}
-					if(remainingExpected > 0) {
+					if (remainingExpected > 0) {
 						remainingExpected--;
 						inFlightExpected++;
 					}
@@ -214,20 +210,20 @@ public class PlainJUnitTest {
 	 */
 	@Test
 	public void testAdvanceStepSkillMode() {
-		// TODO: Implement
 		rand = Mockito.mock(Random.class);
 		Mockito.when(rand.nextGaussian()).thenReturn(0.0);
 
 		Bean[] beans = createBeans(logicSlotCounts[1], 200, false);
 		logics[1].reset(beans);
 
-		while(logics[1].advanceStep()){}	
+		while (logics[1].advanceStep()) {
+			;
+		}	
 
-		for(int i = 0; i < logics[1].getSlotCount(); i++) {
-			if(i == 5) {
+		for (int i = 0; i < logics[1].getSlotCount(); i++) {
+			if (i == 5) {
 				assertEquals("Check on slot bean count", logics[1].getSlotBeanCount(i), 200);
-			}
-			else {
+			} else {
 				assertEquals("Check on slot bean count", logics[1].getSlotBeanCount(i), 0);
 			}
 		}
@@ -253,50 +249,48 @@ public class PlainJUnitTest {
 	 */
 	@Test
 	public void testLowerHalf() {
-		// TODO: Implement
 		BeanCounterLogic logic = logics[1];
-		for(int beanCount: beanCounts) {
+		for (int beanCount: beanCounts) {
 			Bean[] beans = createBeans(logic.getSlotCount(), beanCount, true);
 
 			logic.reset(beans);
 
-			while(logic.advanceStep()){};
+			while (logic.advanceStep()) {
+				;
+			}
 
 			int remainingBeans = 0;
-			if(beanCount % 2 == 0) {
+			if (beanCount % 2 == 0) {
 				remainingBeans = beanCount / 2;
-			}
-			else {
+			} else {
 				remainingBeans = (beanCount + 1) / 2;
 			}
 
 			int[] expectedBeanCounts = new int[logic.getSlotCount()];
 			int[] observedBeanCounts = new int[logic.getSlotCount()];
 
-			for(int i = 0; i < logic.getSlotCount(); i++) {
-				if(remainingBeans > 0) {
+			for (int i = 0; i < logic.getSlotCount(); i++) {
+				if (remainingBeans > 0) {
 					int count = logic.getSlotBeanCount(i);
-					if(remainingBeans > count) {
+					if (remainingBeans > count) {
 						expectedBeanCounts[i] = count;
 						remainingBeans -= count;
-					}
-					else {
+					} else {
 						expectedBeanCounts[i] = remainingBeans;
 						remainingBeans = 0;
 					}
-				}
-				else {
+				} else {
 					expectedBeanCounts[i] = 0;
 				}
 			}
 
 			logic.lowerHalf();
-			for(int i = 0; i < logic.getSlotCount(); i++) {
+			for (int i = 0; i < logic.getSlotCount(); i++) {
 				observedBeanCounts[i] = logic.getSlotBeanCount(i);
 			}
 
-			for(int i = 0; i < logic.getSlotCount(); i++) {
-				assertEquals("Check slot count "+ i, expectedBeanCounts[i], observedBeanCounts[i]);
+			for (int i = 0; i < logic.getSlotCount(); i++) {
+				assertEquals("Check slot count " + i, expectedBeanCounts[i], observedBeanCounts[i]);
 			}
 		}
 	}
@@ -323,48 +317,47 @@ public class PlainJUnitTest {
 	public void testUpperHalf() {
 		// TODO: Implement
 		BeanCounterLogic logic = logics[1];
-		for(int beanCount: beanCounts) {
+		for (int beanCount: beanCounts) {
 			Bean[] beans = createBeans(logic.getSlotCount(), beanCount, true);
 
 			logic.reset(beans);
 
-			while(logic.advanceStep()){};
+			while (logic.advanceStep()) {
+				;
+			}
 
 			int remainingBeans = 0;
-			if(beanCount % 2 == 0) {
+			if (beanCount % 2 == 0) {
 				remainingBeans = beanCount / 2;
-			}
-			else {
+			} else {
 				remainingBeans = (beanCount + 1) / 2;
 			}
 
 			int[] expectedBeanCounts = new int[logic.getSlotCount()];
 			int[] observedBeanCounts = new int[logic.getSlotCount()];
 
-			for(int i = logic.getSlotCount() - 1; i > 0; i--) {
-				if(remainingBeans > 0) {
+			for (int i = logic.getSlotCount() - 1; i > 0; i--) {
+				if (remainingBeans > 0) {
 					int count = logic.getSlotBeanCount(i);
-					if(remainingBeans > count) {
+					if (remainingBeans > count) {
 						expectedBeanCounts[i] = count;
 						remainingBeans -= count;
-					}
-					else {
+					} else {
 						expectedBeanCounts[i] = remainingBeans;
 						remainingBeans = 0;
 					}
-				}
-				else {
+				} else {
 					expectedBeanCounts[i] = 0;
 				}
 			}
 
 			logic.upperHalf();
-			for(int i = 0; i < logic.getSlotCount(); i++) {
+			for (int i = 0; i < logic.getSlotCount(); i++) {
 				observedBeanCounts[i] = logic.getSlotBeanCount(i);
 			}
 
-			for(int i = 0; i < logic.getSlotCount(); i++) {
-				assertEquals("Check slot count "+ i, expectedBeanCounts[i], observedBeanCounts[i]);
+			for (int i = 0; i < logic.getSlotCount(); i++) {
+				assertEquals("Check slot count " + i, expectedBeanCounts[i], observedBeanCounts[i]);
 			}
 		}
 
@@ -388,29 +381,32 @@ public class PlainJUnitTest {
 	 */
 	@Test
 	public void testRepeat() {
-		// TODO: Implement
 		BeanCounterLogic logic = logics[1];
-		for(int beanCount: beanCounts) {
+		for (int beanCount: beanCounts) {
 			Bean[] beans = createBeans(logic.getSlotCount(), beanCount, false);
 			logic.reset(beans);
 
-			while(logic.advanceStep()){}
+			while (logic.advanceStep()) {
+				;
+			}
 
 			int[] expectedSlotCounts = new int[logic.getSlotCount()];
-			for(int i = 0; i < expectedSlotCounts.length; i++) {
+			for (int i = 0; i < expectedSlotCounts.length; i++) {
 				expectedSlotCounts[i] = logic.getSlotBeanCount(i);
 			}
 
 			logic.repeat();
 
-			while(logic.advanceStep()){}
+			while (logic.advanceStep()) {
+				;
+			}
 
 			int[] observedSlotCounts = new int[logic.getSlotCount()];
-			for(int i = 0; i < observedSlotCounts.length; i++) {
+			for (int i = 0; i < observedSlotCounts.length; i++) {
 				observedSlotCounts[i] = logic.getSlotBeanCount(i);
 			}
 
-			for(int i = 0; i < logic.getSlotCount(); i++) {
+			for (int i = 0; i < logic.getSlotCount(); i++) {
 				assertEquals("Check slot count " + i, expectedSlotCounts[i], observedSlotCounts[i]);
 			}
 
@@ -435,16 +431,17 @@ public class PlainJUnitTest {
 	 */
 	@Test
 	public void testGetAverageSlotBeanCount() {
-		// TODO: Implement
 		BeanCounterLogic logic = logics[1];
 		
 		Bean[] beans = createBeans(logic.getSlotCount(), 200, true);
 		logic.reset(beans);
 
-		while(logic.advanceStep()){}
+		while (logic.advanceStep()) {
+			;
+		}
 
 		int sum = 0;
-		for(int i = 0; i < logic.getSlotCount(); i++) {
+		for (int i = 0; i < logic.getSlotCount(); i++) {
 			sum += logic.getSlotBeanCount(i) * i;
 		}
 		double expectedAverage = sum / 200.0;
@@ -470,25 +467,25 @@ public class PlainJUnitTest {
 	 */
 	@Test
 	public void testMain() {
-		// TODO: Implement using out.toString() to get output stream
 		String[] args = {"10", "500", "luck"};
 		BeanCounterLogicImpl.main(args);
-		String output = out.toString();
+		try {
+			String output = out.toString("UTF-8");
+			String[] lines = output.split("\n");
+			int lineCount = lines.length;
+			assertEquals("Check line count", 2, lineCount);
 
-		String[] lines = output.split("\n");
-		int lineCount = lines.length;
-		assertEquals("Check line count", 2, lineCount);
-
-		String[] slots = lines[1].split(" +");
-		assertEquals("Check slot count ", 11, slots.length);
-		
-		int sum = 0;
-		for(int i = 1; i < slots.length; i++) {
-			sum += Integer.parseInt(slots[i].trim());
-		}
-		assertEquals("Check bean count", 500, sum);
-
-		
+			String[] slots = lines[1].split(" +");
+			assertEquals("Check slot count ", 11, slots.length);
+			
+			int sum = 0;
+			for (int i = 1; i < slots.length; i++) {
+				sum += Integer.parseInt(slots[i].trim());
+			}
+			assertEquals("Check bean count", 500, sum);
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("Fail");
+		}		
 
 	}
 

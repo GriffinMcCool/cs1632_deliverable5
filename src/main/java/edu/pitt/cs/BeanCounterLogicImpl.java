@@ -85,10 +85,9 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 	 */
 	public int getInFlightBeanXPos(int yPos) {
 		// TODO: Implement
-		if(inFlightBeans[yPos] == null) {
+		if (inFlightBeans[yPos] == null) {
 			return NO_BEAN_IN_YPOS;
-		}
-		else {
+		} else {
 			return inFlightBeans[yPos].getXPos();
 		}
 		
@@ -114,16 +113,15 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 		// TODO: Implement
 		double sum = 0;
 		double total = 0;
-		for(int i = 0; i < slotCount; i++) {
+		for (int i = 0; i < slotCount; i++) {
 			int beanCount = slots[i].size();
 			sum += (double) beanCount * i;
 			total += (double) beanCount;
 		}
 
-		if(total > 0) {
+		if (total > 0) {
 			return sum / total;
-		}
-		else {
+		} else {
 			return 0.0;
 		}
 		
@@ -140,28 +138,26 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 
 		//get total number of beans in slots
 		int total = 0;
-		for(int i = 0; i < slotCount; i++) {
+		for (int i = 0; i < slotCount; i++) {
 			total += slots[i].size();
 		}
 
 		//figure out how many beans to remove
 		int beansToRemove = 0;
-			if(total % 2 == 0) {
-				beansToRemove = total / 2;
-			}
-			else {
-				beansToRemove = (total - 1) / 2;
-			}
+		if (total % 2 == 0) {
+			beansToRemove = total / 2;
+		} else {
+			beansToRemove = (total - 1) / 2;
+		}
 
 		//remove lower half of beans
-		for(int i = 0; i < slots.length && beansToRemove > 0; i++) {
+		for (int i = 0; i < slots.length && beansToRemove > 0; i++) {
 			int count = slots[i].size();
-			if(beansToRemove > count) {
+			if (beansToRemove > count) {
 				slots[i].clear();
-				 beansToRemove -= count;
-			}
-			else {
-				while(beansToRemove > 0) {
+				beansToRemove -= count;
+			} else {
+				while (beansToRemove > 0) {
 					slots[i].pop();
 					beansToRemove--;
 				}
@@ -176,32 +172,28 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 	 * will be remaining.
 	 */
 	public void lowerHalf() {
-		// TODO: Implement
 
 		//get total number of beans in slots
 		int total = 0;
-		for(int i = 0; i < slotCount; i++) {
+		for (int i = 0; i < slotCount; i++) {
 			total += slots[i].size();
 		}
 
 		//figure out how many beans to remove
 		int beansToRemove = 0;
-			if(total % 2 == 0) {
-				beansToRemove = total / 2;
-			}
-			else {
-				beansToRemove = (total - 1) / 2;
-			}
-
+		if (total % 2 == 0) {
+			beansToRemove = total / 2;
+		} else {
+			beansToRemove = (total - 1) / 2;
+		}
 		//remove upper half of beans
-		for(int i = slots.length - 1; i > 0 && beansToRemove > 0; i--) {
+		for (int i = slots.length - 1; i >= 0 && beansToRemove > 0; i--) {
 			int count = slots[i].size();
-			if(beansToRemove > count) {
+			if (beansToRemove > count) {
 				slots[i].clear();
-				 beansToRemove -= count;
-			}
-			else {
-				while(beansToRemove > 0) {
+				beansToRemove -= count;
+			} else {
+				while (beansToRemove > 0) {
 					slots[i].pop();
 					beansToRemove--;
 				}
@@ -222,19 +214,23 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 		slots = new LinkedList[slotCount];
 
 		//fills the inFlight array with nulls
-		for(int i = 0; i < inFlightBeans.length; i++) {
+		for (int i = 0; i < inFlightBeans.length; i++) {
 			inFlightBeans[i] = null;
 		}
 
 		//fills slots array with 0s
-		for(int i = 0; i < slotCount; i++) {
+		for (int i = 0; i < slotCount; i++) {
 			slots[i] = new LinkedList<Bean>();
 		}
-		if(beans.length > 0) {
+		if (beans.length > 0) {
 			//initializes bean data structures
-			this.beans = beans;
+			Bean[] beans2 = new Bean[beans.length];
+			for (int i = 0; i < beans.length; i++) {
+				beans2[i] = beans[i];
+			}
+			this.beans = beans2;
 			//adds all beans to the waiting queue
-			for(int i = 0; i < beans.length; i++) {
+			for (int i = 0; i < beans.length; i++) {
 				this.beans[i].reset();
 				waitingBeans.add(this.beans[i]);
 			}
@@ -253,8 +249,8 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 		// TODO: Implement
 
 		//add all beans from slots to queue
-		for(int i = 0; i < slots.length; i++) {
-			while(slots[i].size() > 0) {
+		for (int i = 0; i < slots.length; i++) {
+			while (slots[i].size() > 0) {
 				Bean bean = slots[i].pop();
 				bean.reset();
 				waitingBeans.add(bean);
@@ -262,8 +258,8 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 		}
 
 		//add all beans in flight to the queue
-		for(int i = 0; i < inFlightBeans.length; i++) {
-			if(inFlightBeans[i] != null) {
+		for (int i = 0; i < inFlightBeans.length; i++) {
+			if (inFlightBeans[i] != null) {
 				inFlightBeans[i].reset();
 				waitingBeans.add(inFlightBeans[i]);
 				inFlightBeans[i] = null;
@@ -271,7 +267,7 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 		}
 		
 
-		if(!waitingBeans.isEmpty()) {
+		if (!waitingBeans.isEmpty()) {
 			inFlightBeans[0] = waitingBeans.remove();
 		}
 		
@@ -290,14 +286,13 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 		boolean change = false;
 
 		//cycle through inFlight array and advance any beans in flight
-		for(int i = inFlightBeans.length - 1; i >= 0; i--) {
-			if(inFlightBeans[i] != null) {
+		for (int i = inFlightBeans.length - 1; i >= 0; i--) {
+			if (inFlightBeans[i] != null) {
 				Bean bean = inFlightBeans[i];
-				if(i == inFlightBeans.length - 1) {
+				if (i == inFlightBeans.length - 1) {
 					slots[bean.getXPos()].add(bean);
 					inFlightBeans[i] = null;
-				}
-				else {
+				} else {
 					bean.advanceStep();
 					inFlightBeans[i + 1] = bean;
 					inFlightBeans[i] = null;
@@ -307,7 +302,7 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 		}
 
 		//get next waiting bean from queue
-		if(waitingBeans.size() > 0) {
+		if (waitingBeans.size() > 0) {
 			inFlightBeans[0] = waitingBeans.remove();
 			change = true;
 		}
@@ -358,8 +353,8 @@ public class BeanCounterLogicImpl implements BeanCounterLogic {
 	 * @return the string representation of the machine
 	 */
 	@edu.umd.cs.findbugs.annotations.SuppressFBWarnings(
-		    value="VA_FORMAT_STRING_USES_NEWLINE", 
-		    justification="I know we should be using %n instead of \n, but JPF for some reason does not like %n")
+		    value = "VA_FORMAT_STRING_USES_NEWLINE", 
+		    justification = "I know we should be using %n instead of \n, but JPF for some reason does not like %n")
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
 		Formatter fmt = new Formatter(bld);
